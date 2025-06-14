@@ -1,28 +1,48 @@
-import pyautogui
+import subprocess
 import pygetwindow as gw
-import time
+import json
 
-def focus_window(keyword):
-    windows = gw.getWindowsWithTitle(keyword)
-    if windows:
-        windows[0].activate()
-        return True
-    return False
+with open("app_paths.json", "r") as f:
+    app_paths = json.load(f)
 
-def perform_action(command):
-    if "click" in command and "double" not in command:
-        pyautogui.click()
-    elif "double click" in command:
-        pyautogui.doubleClick()
-    elif "right click" in command:
-        pyautogui.rightClick()
-    elif "scroll down" in command:
-        pyautogui.scroll(-800)
-    elif "scroll up" in command:
-        pyautogui.scroll(800)
-    elif "screenshot" in command:
-        name = f"screenshot_{int(time.time())}.png"
-        pyautogui.screenshot(name)
-        print("Screenshot saved:", name)
+def open_application(app_name):
+    if app_name in app_paths:
+        try:
+            subprocess.Popen(app_paths[app_name])
+            print(f"✅ Opening {app_name}")
+        except Exception as e:
+            print(f"❌ Failed to open {app_name}: {e}")
     else:
-        print("Unrecognized action.")
+        print(f"⚠️ '{app_name}' not found in app_paths.json")
+
+def find_window(app_name):
+    for title in gw.getAllTitles():
+        if app_name.lower() in title.lower():
+            return gw.getWindowsWithTitle(title)[0]
+    return None
+
+def focus_window(app_name):
+    win = find_window(app_name)
+    if win:
+        win.activate()
+        print(f"🧭 Focused on {win.title}")
+    else:
+        print(f"❌ Could not find {app_name}")
+
+def minimize_window():
+    win = gw.getActiveWindow()
+    if win:
+        win.minimize()
+        print("🟡 Minimized")
+
+def restore_window():
+    win = gw.getActiveWindow()
+    if win:
+        win.restore()
+        print("🟢 Restored")
+
+def close_window():
+    win = gw.getActiveWindow()
+    if win:
+        win.close()
+        print("❌ Closed")

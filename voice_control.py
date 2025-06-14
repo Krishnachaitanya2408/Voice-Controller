@@ -1,20 +1,50 @@
-from vosk import Model, KaldiRecognizer
-import pyaudio
-import json
-import os
+import speech_recognition as sr
+from app_control import (
+    open_application,
+    focus_window,
+    minimize_window,
+    restore_window,
+    close_window
+)
 
-# Path to model folder
-model_path = os.path.join(os.path.dirname(__file__), "models", "vosk-model-small-en-us-0.15")
-model = Model(model_path)
-recognizer = KaldiRecognizer(model, 16000)
+class VoiceController:
+    def __init__(self):
+        self.recognizer = sr.Recognizer()
+        self.microphone = sr.Microphone()
 
-p = pyaudio.PyAudio()
-stream = p.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=8000)
-stream.start_stream()
+    def handle_command(self, command):
+        command = command.lower()
+        print(f"🎧 Recognized: {command}")
 
-def get_voice_command():
-    data = stream.read(4000, exception_on_overflow=False)
-    if recognizer.AcceptWaveform(data):
-        result = json.loads(recognizer.Result())
-        return result.get("text", "")
-    return ""
+        if command.startswith("open "):
+            app_name = command.replace("open ", "").strip()
+            open_application(app_name)
+        elif command.startswith("focus "):
+            app_name = command.replace("focus ", "").strip()
+            focus_window(app_name)
+        elif "minimize" in command:
+            minimize_window()
+        elif "close" in command:
+            close_window()
+        elif "restore" in command or "maximize" in command:
+            restore_window()
+        else:
+            print("🤷 Command not recognized.")
+
+    def run(self):
+        print("🎙️ Say a command (e.g., 'open notepad', 'focus chrome', 'minimize')...")
+
+        with self.microphone as source:
+            self.recognizer.adjust_for_ambient_noise(source, duration=1)
+            while True:
+                print("🎧 Listening...")
+                try:
+                    audio = self.recognizer.listen(source, timeout=5)
+                    command = self.recognizer.recognize_google(audio)
+                    self.handle_command(command)
+                except sr.WaitTimeoutError:
+                    print("⏱️ Listening timed out. Try again...")
+                except sr.UnknownValueError:
+                    print("❌ Could not understand audio.")
+                except sr.RequestError as e:
+                    print(f"🔌 API unavailable: {e}")

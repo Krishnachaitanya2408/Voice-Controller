@@ -1,0 +1,11 @@
+{
+  "notepad": "notepad",
+  "calculator": "calc",
+  "chrome": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+  "cmd": "cmd",
+  "paint": "mspaint",
+  "explorer": "explorer",
+  "vscode": "C:/Users/YOUR_USERNAME/AppData/Local/Programs/Microsoft VS Code/Code.exe",
+  "word": "C:/Program Files/Microsoft Office/root/Office16/WINWORD.EXE",
+  "excel": "C:/Program Files/Microsoft Office/root/Office16/EXCEL.EXE"
+}
