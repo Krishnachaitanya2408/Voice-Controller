@@ -1,6 +1,8 @@
 import subprocess
 import pygetwindow as gw
 import json
+import pyautogui
+import datetime
 
 with open("app_paths.json", "r") as f:
     app_paths = json.load(f)
@@ -29,6 +31,14 @@ def focus_window(app_name):
     else:
         print(f"❌ Could not find {app_name}")
 
+def switch_to_window(app_name):
+    win = find_window(app_name)
+    if win:
+        win.activate()
+        print(f"🔀 Switched to {win.title}")
+    else:
+        print(f"❌ Could not find window for {app_name}")
+
 def minimize_window():
     win = gw.getActiveWindow()
     if win:
@@ -46,3 +56,14 @@ def close_window():
     if win:
         win.close()
         print("❌ Closed")
+
+def list_open_apps():
+    titles = [title for title in gw.getAllTitles() if title.strip()]
+    print("📋 Open windows:", titles)
+    return titles
+
+def take_screenshot():
+    now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"screenshot_{now}.png"
+    pyautogui.screenshot().save(filename)
+    print(f"📸 Screenshot saved as {filename}")
